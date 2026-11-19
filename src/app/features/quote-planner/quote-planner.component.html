@@ -56,28 +56,34 @@
           Plan Your Trip, <span class="text-red-500">Get Instant Fare</span>
         </h2>
         <p class="mt-2 text-xs sm:text-sm text-slate-300 font-light leading-relaxed">
-          Select your pickup and drop-off points, choose the right truck, and find the most affordable fare in seconds — no hidden costs.
+          Select your pickup and drop-off points, choose the right truck, and find the most affordable fare in seconds — <strong class="text-red-500 font-bold tracking-wider">NO HIDDEN COSTS</strong>.
         </p>
       </div>
     </div>
   </section>
 
-  <!-- Notification Banner / Toast -->
+  <!-- Floating Toast Notification (Never overlaps or gets clipped) -->
   @if (feedbackMessage(); as msg) {
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+    <div class="fixed top-20 right-4 sm:right-8 z-50 max-w-md w-full px-4 animate-bounce-short">
       <div
-        class="p-4 rounded-xl text-sm flex items-center justify-between transition-all"
+        class="p-4 rounded-2xl text-xs sm:text-sm flex items-center justify-between shadow-xl backdrop-blur-md border transition-all"
         [ngClass]="{
-          'bg-emerald-50 text-emerald-800 border border-emerald-200': msg.type === 'success',
-          'bg-blue-50 text-blue-800 border border-blue-200': msg.type === 'info',
-          'bg-rose-50 text-rose-800 border border-rose-200': msg.type === 'error'
+          'bg-emerald-900/95 text-emerald-100 border-emerald-700 shadow-emerald-950/20': msg.type === 'success',
+          'bg-slate-900/95 text-slate-100 border-slate-700 shadow-slate-950/20': msg.type === 'info',
+          'bg-rose-900/95 text-rose-100 border-rose-700 shadow-rose-950/30': msg.type === 'error'
         }"
       >
-        <div class="flex items-center space-x-2">
-          <span>{{ msg.type === 'success' ? '✓' : msg.type === 'info' ? 'ℹ' : '⚠' }}</span>
-          <span class="font-medium">{{ msg.text }}</span>
+        <div class="flex items-center space-x-3">
+          <span class="text-base shrink-0">{{ msg.type === 'success' ? '✓' : msg.type === 'info' ? 'ℹ' : '⚠️' }}</span>
+          <span class="font-medium leading-snug">{{ msg.text }}</span>
         </div>
-        <button (click)="feedbackMessage.set(null)" class="text-xs opacity-60 hover:opacity-100 font-bold ml-4">✕</button>
+        <button
+          type="button"
+          (click)="feedbackMessage.set(null)"
+          class="text-xs opacity-60 hover:opacity-100 font-bold ml-4 p-1 hover:bg-white/10 rounded-md transition"
+        >
+          ✕
+        </button>
       </div>
     </div>
   }
@@ -138,13 +144,17 @@
               <select
                 id="pickupLocation"
                 formControlName="pickupLocationId"
-                class="w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition"
+                class="w-full rounded-xl border bg-white py-2.5 px-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition"
+                [ngClass]="tripForm.get('pickupLocationId')?.invalid && tripForm.get('pickupLocationId')?.touched ? 'border-rose-400 bg-rose-50/20 ring-1 ring-rose-200' : 'border-slate-300'"
               >
                 <option [ngValue]="null" disabled>Select Pickup Location...</option>
                 @for (loc of availableLocations; track loc.id) {
                   <option [value]="loc.id">{{ loc.name }} ({{ loc.id }})</option>
                 }
               </select>
+              @if (tripForm.get('pickupLocationId')?.invalid && tripForm.get('pickupLocationId')?.touched) {
+                <p class="mt-1 text-[11px] text-rose-600 font-semibold">⚠️ Please select a pickup location.</p>
+              }
             </div>
 
             <!-- Drop-off Locations (CDK Drag and Drop) -->
@@ -181,7 +191,8 @@
                     <div class="flex-1">
                       <select
                         [formControl]="control"
-                        class="w-full rounded-lg border border-slate-300 bg-white py-1.5 px-2.5 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none"
+                        class="w-full rounded-lg border bg-white py-1.5 px-2.5 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none"
+                        [ngClass]="control.invalid && control.touched ? 'border-rose-400 bg-rose-50/20 ring-1 ring-rose-200' : 'border-slate-300'"
                       >
                         <option [ngValue]="null" disabled>Select Drop-off {{ i + 1 }}...</option>
                         @for (loc of availableLocations; track loc.id) {
@@ -235,8 +246,12 @@
                 type="datetime-local"
                 [min]="minDateTimeString"
                 formControlName="pickupDateTime"
-                class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none"
+                class="w-full rounded-xl border py-2.5 px-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none"
+                [ngClass]="tripForm.get('pickupDateTime')?.invalid && tripForm.get('pickupDateTime')?.touched ? 'border-rose-400 bg-rose-50/20 ring-1 ring-rose-200' : 'border-slate-300'"
               />
+              @if (tripForm.get('pickupDateTime')?.errors?.['required'] && tripForm.get('pickupDateTime')?.touched) {
+                <p class="mt-1 text-[11px] text-rose-600 font-semibold">⚠️ Please select a pickup date & time.</p>
+              }
               @if (tripForm.get('pickupDateTime')?.errors?.['pastDateTime']) {
                 <p class="mt-1 text-[11px] text-rose-600 font-semibold">
                   ⚠️ {{ tripForm.get('pickupDateTime')?.errors?.['pastDateTime'] }}
@@ -318,8 +333,12 @@
                   min="0.1"
                   placeholder="e.g. 5.0"
                   formControlName="cargoWeightTonnes"
-                  class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none"
+                  class="w-full rounded-xl border py-2.5 px-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none"
+                  [ngClass]="tripForm.get('cargoWeightTonnes')?.invalid && tripForm.get('cargoWeightTonnes')?.touched ? 'border-rose-400 bg-rose-50/20 ring-1 ring-rose-200' : 'border-slate-300'"
                 />
+                @if (tripForm.get('cargoWeightTonnes')?.errors?.['required'] && tripForm.get('cargoWeightTonnes')?.touched) {
+                  <p class="mt-1 text-[11px] text-rose-600 font-semibold">⚠️ Please enter cargo weight in tonnes.</p>
+                }
                 @if (tripForm.errors?.['exceedsCapacity']; as capErr) {
                   <p class="mt-1 text-[11px] text-rose-600 font-semibold leading-tight">
                     ⚠️ {{ capErr.message }}
