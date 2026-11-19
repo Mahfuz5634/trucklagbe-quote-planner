@@ -35,6 +35,35 @@
     </div>
   </header>
 
+  <!-- Hero Banner Section -->
+  <section class="relative bg-slate-900 text-white overflow-hidden py-10 md:py-14 shadow-inner">
+    <!-- Background Image with Ambient Gradient Overlay -->
+    <div class="absolute inset-0 z-0">
+      <img
+        src="/images/hero-banner.jpg"
+        alt="Truck Lagbe Highway Banner"
+        class="w-full h-full object-cover object-center opacity-45"
+      />
+      <div class="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-900/80 to-slate-950/40"></div>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-2xl">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-600/20 text-red-400 border border-red-500/30 mb-3">
+          <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+          Instant Logistics Fare Estimator
+        </span>
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-white leading-tight">
+          Multi-Stop Trip <span class="text-red-500">Quote Planner</span>
+        </h2>
+        <p class="mt-2 text-xs sm:text-sm text-slate-300 font-light leading-relaxed">
+          Configure pickup and multiple drop-offs, customize truck requirements, and get fast transparent fare estimates with real-time rate validation.
+        </p>
+      </div>
+    </div>
+  </section>
+
   <!-- Notification Banner / Toast -->
   @if (feedbackMessage(); as msg) {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
@@ -56,7 +85,7 @@
   }
 
   <!-- Main Container -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       
       <!-- Left Column: Form Configuration (7 cols on lg) -->
