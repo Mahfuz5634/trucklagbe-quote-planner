@@ -20,10 +20,10 @@ describe('AppComponent', () => {
     expect(app.title).toEqual('truck-quote-planner');
   });
 
-  it('should render title', () => {
+  it('should render main header title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, truck-quote-planner');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Multi-Stop Trip Quote Planner');
   });
 });

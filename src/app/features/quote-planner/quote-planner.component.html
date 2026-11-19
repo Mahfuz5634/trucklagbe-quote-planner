@@ -1,0 +1,490 @@
+<div class="min-h-screen bg-slate-50 text-slate-800 antialiased pb-16">
+  <!-- Top Header Navigation -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <!-- Logo / Badge -->
+        <div class="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center text-white font-black text-xl shadow-sm">
+          TL
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-slate-900 leading-tight">Multi-Stop Trip Quote Planner</h1>
+          <p class="text-xs text-slate-500 hidden sm:block">Truck Lagbe • Web-App Engineer Assessment</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions in Header -->
+      <div class="flex items-center space-x-2">
+        <button
+          type="button"
+          (click)="saveDraft()"
+          class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-700 transition"
+          title="Save incomplete configuration locally"
+        >
+          💾 Save Draft
+        </button>
+        <button
+          type="button"
+          (click)="clearDraftAndReset()"
+          class="px-3 py-1.5 text-xs font-semibold rounded-lg text-rose-600 hover:bg-rose-50 transition"
+        >
+          ✕ Reset
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Banner / Toast -->
+  @if (feedbackMessage(); as msg) {
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+      <div
+        class="p-4 rounded-xl text-sm flex items-center justify-between transition-all"
+        [ngClass]="{
+          'bg-emerald-50 text-emerald-800 border border-emerald-200': msg.type === 'success',
+          'bg-blue-50 text-blue-800 border border-blue-200': msg.type === 'info',
+          'bg-rose-50 text-rose-800 border border-rose-200': msg.type === 'error'
+        }"
+      >
+        <div class="flex items-center space-x-2">
+          <span>{{ msg.type === 'success' ? '✓' : msg.type === 'info' ? 'ℹ' : '⚠' }}</span>
+          <span class="font-medium">{{ msg.text }}</span>
+        </div>
+        <button (click)="feedbackMessage.set(null)" class="text-xs opacity-60 hover:opacity-100 font-bold ml-4">✕</button>
+      </div>
+    </div>
+  }
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- Left Column: Form Configuration (7 cols on lg) -->
+      <section class="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6">
+        <h2 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-3 mb-6 flex items-center justify-between">
+          <span>1. Trip Configuration</span>
+          <span class="text-xs font-normal text-slate-500">* All locations must be unique</span>
+        </h2>
+
+        <form [formGroup]="tripForm" class="space-y-6">
+          
+          <!-- Locations Section -->
+          <div class="space-y-4">
+            <!-- Pickup Location -->
+            <div>
+              <label for="pickupLocation" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
+                Pickup Location <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <select
+                  id="pickupLocation"
+                  formControlName="pickupLocationId"
+                  class="w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition"
+                >
+                  <option [ngValue]="null" disabled>Select Pickup Location...</option>
+                  @for (loc of availableLocations; track loc.id) {
+                    <option [value]="loc.id">{{ loc.name }} ({{ loc.id }})</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <!-- Drop-off Locations (CDK Drag and Drop) -->
+            <div class="pt-2">
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                  Drop-off Locations (1 to 3 ordered stops) <span class="text-red-500">*</span>
+                </label>
+                <span class="text-xs text-slate-400">Drag to reorder stops</span>
+              </div>
+
+              <!-- CDK Drop List -->
+              <div
+                cdkDropList
+                (cdkDropListDropped)="onDrop($event)"
+                class="space-y-2.5"
+              >
+                @for (control of dropOffControls; track $index; let i = $index) {
+                  <div
+                    cdkDrag
+                    class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-2xs hover:border-slate-300 transition group cursor-move"
+                  >
+                    <!-- Drag Handle Icon -->
+                    <div class="text-slate-400 group-hover:text-slate-600 px-1 select-none text-base">
+                      ⋮⋮
+                    </div>
+
+                    <!-- Drop badge number -->
+                    <div class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center shrink-0">
+                      {{ i + 1 }}
+                    </div>
+
+                    <!-- Dropdown for Location -->
+                    <div class="flex-1">
+                      <select
+                        [formControl]="control"
+                        class="w-full rounded-lg border border-slate-300 bg-white py-1.5 px-2.5 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none"
+                      >
+                        <option [ngValue]="null" disabled>Select Drop-off {{ i + 1 }}...</option>
+                        @for (loc of availableLocations; track loc.id) {
+                          <option [value]="loc.id">{{ loc.name }} ({{ loc.id }})</option>
+                        }
+                      </select>
+                    </div>
+
+                    <!-- Delete button (if > 1 drop) -->
+                    @if (dropOffControls.length > 1) {
+                      <button
+                        type="button"
+                        (click)="removeDropOff(i)"
+                        class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition"
+                        title="Remove stop"
+                      >
+                        ✕
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+
+              <!-- Add Drop-off Button (max 3) -->
+              @if (dropOffControls.length < 3) {
+                <button
+                  type="button"
+                  (click)="addDropOff()"
+                  class="mt-2.5 inline-flex items-center space-x-1.5 text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition"
+                >
+                  <span>+</span>
+                  <span>Add another drop-off location ({{ dropOffControls.length }}/3)</span>
+                </button>
+              }
+            </div>
+
+            <!-- Duplicate Locations Error -->
+            @if (tripForm.errors?.['duplicateLocations']) {
+              <div class="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-medium">
+                ⚠️ {{ tripForm.errors?.['duplicateLocations'] }}
+              </div>
+            }
+          </div>
+
+          <!-- Truck Selection and Count -->
+          <div class="pt-4 border-t border-slate-100">
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">
+              Select Truck Category <span class="text-red-500">*</span>
+            </label>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              @for (truck of truckCategoriesList; track truck.id) {
+                <label
+                  class="cursor-pointer border rounded-xl p-3 flex flex-col justify-between transition-all"
+                  [ngClass]="{
+                    'border-red-500 bg-red-50/40 ring-2 ring-red-100': tripForm.get('truckCategoryId')?.value === truck.id,
+                    'border-slate-200 hover:border-slate-300 bg-white': tripForm.get('truckCategoryId')?.value !== truck.id
+                  }"
+                >
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-sm text-slate-900">{{ truck.id | titlecase }}</span>
+                    <input
+                      type="radio"
+                      formControlName="truckCategoryId"
+                      [value]="truck.id"
+                      class="text-red-600 focus:ring-red-500"
+                    />
+                  </div>
+                  <div class="mt-2 space-y-0.5 text-xs text-slate-500">
+                    <p>Cap: <strong class="text-slate-800">{{ truck.capacityTonnes }}t</strong></p>
+                    <p>Rate: {{ truck.ratePerKm }} BDT/km</p>
+                    <p class="text-[11px] text-slate-400">Min: {{ truck.minimumFare }} BDT</p>
+                  </div>
+                </label>
+              }
+            </div>
+          </div>
+
+          <!-- Truck Count and Cargo Weight Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Truck Count (1 to 5) -->
+            <div>
+              <label for="truckCount" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
+                Number of Trucks (1–5) <span class="text-red-500">*</span>
+              </label>
+              <input
+                id="truckCount"
+                type="number"
+                min="1"
+                max="5"
+                formControlName="truckCount"
+                class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none"
+              />
+              <p class="mt-1 text-[11px] text-slate-500">
+                Combined capacity: <strong class="text-slate-800">{{ totalTruckCapacity }} tonnes</strong>
+              </p>
+            </div>
+
+            <!-- Cargo Weight in Tonnes -->
+            <div>
+              <label for="cargoWeight" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
+                Total Cargo Weight (Tonnes) <span class="text-red-500">*</span>
+              </label>
+              <input
+                id="cargoWeight"
+                type="number"
+                step="0.1"
+                min="0.1"
+                placeholder="e.g. 5.0"
+                formControlName="cargoWeightTonnes"
+                class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none"
+              />
+              @if (tripForm.errors?.['exceedsCapacity']; as capErr) {
+                <p class="mt-1 text-[11px] text-rose-600 font-semibold">
+                  ⚠️ {{ capErr.message }}
+                </p>
+              }
+            </div>
+          </div>
+
+          <!-- Pickup Date & Time -->
+          <div class="pt-4 border-t border-slate-100">
+            <label for="pickupTime" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
+              Pickup Date & Time (Future) <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="pickupTime"
+              type="datetime-local"
+              [min]="minDateTimeString"
+              formControlName="pickupDateTime"
+              class="w-full sm:w-80 rounded-xl border border-slate-300 py-2 px-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none"
+            />
+            @if (tripForm.get('pickupDateTime')?.errors?.['pastDateTime']) {
+              <p class="mt-1 text-[11px] text-rose-600 font-semibold">
+                ⚠️ {{ tripForm.get('pickupDateTime')?.errors?.['pastDateTime'] }}
+              </p>
+            }
+          </div>
+
+          <!-- Optional Services Checkboxes -->
+          <div class="pt-4 border-t border-slate-100 space-y-3">
+            <span class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+              Optional Assistance Services
+            </span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="flex items-center space-x-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-sm">
+                <input
+                  type="checkbox"
+                  formControlName="loadingAssistance"
+                  class="rounded text-red-600 focus:ring-red-500 h-4 w-4"
+                />
+                <div>
+                  <span class="font-medium text-slate-800">Loading Assistance</span>
+                  <span class="block text-xs text-slate-500">+600 BDT per truck</span>
+                </div>
+              </label>
+
+              <label class="flex items-center space-x-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-sm">
+                <input
+                  type="checkbox"
+                  formControlName="unloadingAssistance"
+                  class="rounded text-red-600 focus:ring-red-500 h-4 w-4"
+                />
+                <div>
+                  <span class="font-medium text-slate-800">Unloading Assistance</span>
+                  <span class="block text-xs text-slate-500">+400 BDT per truck</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-3">
+            <button
+              type="button"
+              (click)="onRequestQuote()"
+              [disabled]="quoteService.state().status === 'loading'"
+              class="w-full sm:w-auto flex-1 bg-red-600 hover:bg-red-700 disabled:bg-slate-300 text-white font-bold py-3 px-6 rounded-xl shadow-sm transition flex items-center justify-center space-x-2 text-sm"
+            >
+              @if (quoteService.state().status === 'loading') {
+                <span class="animate-spin text-base">⏳</span>
+                <span>Calculating Quote...</span>
+              } @else {
+                <span>Request Fare Estimate →</span>
+              }
+            </button>
+
+            <button
+              type="button"
+              (click)="saveDraft()"
+              class="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm transition"
+            >
+              Save Draft
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Right Column: Quote Summary & Estimate Display (5 cols on lg) -->
+      <aside class="lg:col-span-5 space-y-6">
+        
+        <!-- Outdated Quote Warning (if user changed form after getting quote) -->
+        @if (inputsModifiedSinceQuote() && quoteService.state().estimate) {
+          <div class="p-4 bg-amber-50 border border-amber-300 text-amber-900 rounded-2xl text-xs space-y-1">
+            <p class="font-bold">⚠️ Form modified</p>
+            <p>You changed your trip parameters. Click <strong>"Request Fare Estimate"</strong> to recalculate.</p>
+          </div>
+        }
+
+        <!-- Loading State Card -->
+        @if (quoteService.state().status === 'loading') {
+          <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center space-y-4 shadow-xs animate-pulse">
+            <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 mx-auto flex items-center justify-center font-bold text-xl animate-spin">
+              ⚙️
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">Calculating Fare Estimate</h3>
+              <p class="text-xs text-slate-500 mt-1">Simulating asynchronous route calculation (300ms–1200ms)...</p>
+            </div>
+          </div>
+        }
+
+        <!-- Error State Card -->
+        @if (quoteService.state().status === 'error') {
+          <div class="bg-rose-50 rounded-2xl border border-rose-200 p-6 text-rose-800 space-y-2">
+            <h3 class="font-bold text-sm">Failed to generate quote</h3>
+            <p class="text-xs">{{ quoteService.state().errorMessage }}</p>
+          </div>
+        }
+
+        <!-- Success State: Detailed Quote Breakdown -->
+        @if (quoteService.state().status === 'success' && quoteService.state().estimate; as quote) {
+          <div
+            class="bg-white rounded-2xl border shadow-sm p-6 space-y-6 transition-all"
+            [ngClass]="{'border-red-300 ring-2 ring-red-50': !inputsModifiedSinceQuote(), 'opacity-60 border-slate-200': inputsModifiedSinceQuote()}"
+          >
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <span class="text-[11px] font-bold tracking-wider uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                  Active Estimate
+                </span>
+                <h3 class="text-lg font-black text-slate-900 mt-1">Trip Fare Summary</h3>
+              </div>
+              <div class="text-right text-xs text-slate-400">
+                Total Distance<br/>
+                <span class="text-base font-bold text-slate-800">{{ quote.distanceKm }} km</span>
+              </div>
+            </div>
+
+            <!-- Route Sequence visualization -->
+            <div>
+              <span class="text-xs font-semibold text-slate-500 block mb-2">Calculated Route (Sequential):</span>
+              <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                @for (loc of quote.routeLocations; track loc.id; let last = $last; let first = $first) {
+                  <span
+                    class="px-2.5 py-1 rounded-lg font-semibold"
+                    [ngClass]="first ? 'bg-red-600 text-white' : 'bg-slate-100 text-slate-800'"
+                  >
+                    {{ loc.name }} ({{ loc.id }})
+                  </span>
+                  @if (!last) {
+                    <span class="text-slate-400">→</span>
+                  }
+                }
+              </div>
+            </div>
+
+            <!-- Financial Breakdown Table -->
+            <div class="space-y-3 pt-2 text-xs text-slate-600 border-t border-slate-100">
+              <!-- Transport Cost -->
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="font-semibold text-slate-800">Transportation Subtotal</span>
+                  <span class="block text-[11px] text-slate-400">
+                    {{ quote.truckCount }} truck(s) × {{ quote.farePerTruck }} BDT
+                    @if (quote.farePerTruck === quote.minimumFarePerTruck) {
+                      (Min fare enforced)
+                    }
+                  </span>
+                </div>
+                <span class="font-bold text-slate-900">{{ quote.transportCost }} BDT</span>
+              </div>
+
+              <!-- Services Breakdown -->
+              @if (quote.loadingCost > 0) {
+                <div class="flex items-center justify-between">
+                  <span>Loading Assistance ({{ quote.truckCount }} × 600 BDT)</span>
+                  <span class="font-medium text-slate-800">{{ quote.loadingCost }} BDT</span>
+                </div>
+              }
+
+              @if (quote.unloadingCost > 0) {
+                <div class="flex items-center justify-between">
+                  <span>Unloading Assistance ({{ quote.truckCount }} × 400 BDT)</span>
+                  <span class="font-medium text-slate-800">{{ quote.unloadingCost }} BDT</span>
+                </div>
+              }
+
+              @if (quote.serviceCost > 0) {
+                <div class="flex items-center justify-between font-semibold text-slate-700 pt-1">
+                  <span>Optional Services Subtotal</span>
+                  <span>{{ quote.serviceCost }} BDT</span>
+                </div>
+              }
+
+              <!-- Grand Total -->
+              <div class="pt-4 border-t-2 border-dashed border-slate-200 flex items-baseline justify-between">
+                <div>
+                  <span class="text-xs uppercase tracking-wider font-bold text-slate-500">Estimated Total</span>
+                  <p class="text-[10px] text-slate-400">Inclusive of transportation and selected services</p>
+                </div>
+                <div class="text-right">
+                  <span class="text-2xl font-black text-red-600">{{ quote.totalQuote }}</span>
+                  <span class="text-xs font-bold text-slate-600 ml-1">BDT</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reference/Verification Note -->
+            <div class="bg-slate-50 p-3 rounded-xl text-[11px] text-slate-500 border border-slate-200/60">
+              💡 <em>Formula applied: Distance ({{ quote.distanceKm }} km) × Rate ({{ quote.ratePerKm }} BDT/km) = Base Transport + Optional Services.</em>
+            </div>
+          </div>
+        }
+
+        <!-- Empty / Idle State -->
+        @if (quoteService.state().status === 'idle') {
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-8 text-center space-y-4 shadow-xs">
+            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-xl">
+              📍
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-800 text-sm">No Active Quote</h3>
+              <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
+                Fill in the pickup, drop-off locations, truck requirements, and click <strong>"Request Fare Estimate"</strong> to calculate.
+              </p>
+            </div>
+          </div>
+        }
+
+        <!-- Assessment Distance Reference Table Drawer/Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs text-xs space-y-3">
+          <h4 class="font-bold text-slate-900 flex items-center justify-between">
+            <span>Official Distance Matrix (Fictional)</span>
+            <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">Symmetric</span>
+          </h4>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-600 text-[11px]">
+            <div>A–B: <strong>12 km</strong></div>
+            <div>B–C: <strong>15 km</strong></div>
+            <div>A–C: <strong>18 km</strong></div>
+            <div>B–D: <strong>29 km</strong></div>
+            <div>A–D: <strong>26 km</strong></div>
+            <div>B–E: <strong>24 km</strong></div>
+            <div>A–E: <strong>30 km</strong></div>
+            <div>C–D: <strong>22 km</strong></div>
+            <div>D–E: <strong>17 km</strong></div>
+            <div>C–E: <strong>28 km</strong></div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+</div>
