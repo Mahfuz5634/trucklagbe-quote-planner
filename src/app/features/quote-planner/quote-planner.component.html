@@ -414,6 +414,7 @@
                   min="1"
                   max="5"
                   formControlName="truckCount"
+                  (wheel)="$any($event.target).blur()"
                   class="w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm font-medium text-slate-800 shadow-2xs hover:border-slate-400 focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition"
                 />
                 <p class="mt-1 text-[11px] text-slate-500">
@@ -433,6 +434,7 @@
                   min="0.1"
                   placeholder="e.g. 5.0"
                   formControlName="cargoWeightTonnes"
+                  (wheel)="$any($event.target).blur()"
                   class="w-full rounded-xl border bg-white py-2.5 px-3 text-sm font-medium text-slate-800 shadow-2xs hover:border-slate-400 focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition"
                   [ngClass]="tripForm.get('cargoWeightTonnes')?.invalid && tripForm.get('cargoWeightTonnes')?.touched ? 'border-rose-400 bg-rose-50/20 ring-1 ring-rose-200' : 'border-slate-300'"
                 />
