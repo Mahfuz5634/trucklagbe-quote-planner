@@ -127,6 +127,46 @@ export class QuotePlannerComponent implements OnInit {
     this.tripForm.updateValueAndValidity();
   }
 
+  /**
+   * Prevents selecting the same location twice across pickup and drop-off stops.
+   * If a location is already chosen elsewhere, it is disabled in this dropdown.
+   */
+  isLocationDisabled(locationId: LocationId, target: 'pickup' | number): boolean {
+    if (!this.tripForm) return false;
+
+    const pickup = this.tripForm.get('pickupLocationId')?.value as LocationId | null;
+    const dropOffs = (this.tripForm.get('dropOffLocations')?.value as (LocationId | null)[]) || [];
+
+    if (target === 'pickup') {
+      return dropOffs.includes(locationId);
+    } else {
+      if (pickup === locationId) return true;
+      for (let j = 0; j < dropOffs.length; j++) {
+        if (j !== target && dropOffs[j] === locationId) {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
+
+  // Helper to set quick future schedule
+  setQuickSchedule(hoursFromNow: number): void {
+    const target = new Date();
+    target.setHours(target.getHours() + hoursFromNow);
+    const year = target.getFullYear();
+    const month = String(target.getMonth() + 1).padStart(2, '0');
+    const day = String(target.getDate()).padStart(2, '0');
+    const hours = String(target.getHours()).padStart(2, '0');
+    const minutes = String(target.getMinutes()).padStart(2, '0');
+    const formatted = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+    this.tripForm.get('pickupDateTime')?.setValue(formatted);
+    this.tripForm.get('pickupDateTime')?.markAsTouched();
+    this.tripForm.get('pickupDateTime')?.updateValueAndValidity();
+    this.tripForm.updateValueAndValidity();
+  }
+
   // Helper to get total truck capacity based on current selection
   get totalTruckCapacity(): number {
     const categoryId = this.tripForm.get('truckCategoryId')?.value as TruckCategoryId;
@@ -271,6 +311,6 @@ export class QuotePlannerComponent implements OnInit {
 
   getLocationName(id: string): string {
     const loc = this.availableLocations.find((l) => l.id === id);
-    return loc ? `${loc.name} (${loc.id})` : id;
+    return loc ? loc.name : id;
   }
 }
