@@ -160,14 +160,9 @@
 
             <!-- Pickup Location -->
             <div>
-              <div class="flex items-center justify-between mb-1.5">
-                <label for="pickupLocation" class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
-                  Pickup Location <span class="text-red-500">*</span>
-                </label>
-                <span class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 border border-emerald-200">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Origin
-                </span>
-              </div>
+              <label for="pickupLocation" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                Pickup Location <span class="text-red-500">*</span>
+              </label>
               <div
                 class="relative flex items-center rounded-xl border bg-white shadow-2xs hover:border-slate-400 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-100 transition-all"
                 [ngClass]="tripForm.get('pickupLocationId')?.invalid && tripForm.get('pickupLocationId')?.touched ? 'border-rose-400 bg-rose-50/20 ring-1 ring-rose-200' : 'border-slate-300'"
