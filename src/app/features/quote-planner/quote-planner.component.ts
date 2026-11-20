@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormArray,
@@ -43,6 +43,26 @@ export class QuotePlannerComponent implements OnInit {
 
   // Tracks if inputs changed after a quote was produced
   inputsModifiedSinceQuote = signal<boolean>(false);
+  // Allows user to dismiss/close the quote card
+  quoteDismissed = signal<boolean>(false);
+
+  constructor() {
+    effect(() => {
+      const state = this.quoteService.state();
+      if (state.status === 'success' && !this.quoteDismissed()) {
+        setTimeout(() => {
+          const el = document.getElementById('quoteResultSection');
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }, 120);
+      }
+    });
+  }
+
+  dismissQuote(): void {
+    this.quoteDismissed.set(true);
+  }
 
   ngOnInit(): void {
     this.updateMinDateTime();
@@ -209,6 +229,7 @@ export class QuotePlannerComponent implements OnInit {
     };
 
     this.inputsModifiedSinceQuote.set(false);
+    this.quoteDismissed.set(false);
     this.quoteService.requestQuote(trip);
   }
 

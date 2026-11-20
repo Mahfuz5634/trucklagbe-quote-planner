@@ -46,9 +46,9 @@
       <img
         src="/images/hero-banner.jpg"
         alt="Truck Lagbe Highway Banner"
-        class="w-full h-full object-cover object-center opacity-45"
+        class="w-full h-full object-cover object-right sm:object-center opacity-85"
       />
-      <div class="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-900/80 to-slate-950/40"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-900/60 to-slate-950/20"></div>
     </div>
 
     <!-- Hero Content -->
@@ -58,10 +58,10 @@
           <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
           Truck Lagbe Smart Planner
         </span>
-        <h2 class="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-white leading-tight">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-white leading-tight drop-shadow-sm">
           Plan Your Trip, <span class="text-red-500">Get Instant Fare</span>
         </h2>
-        <p class="mt-2 text-xs sm:text-sm text-slate-300 font-light leading-relaxed">
+        <p class="mt-2 text-xs sm:text-sm text-slate-200 font-normal leading-relaxed drop-shadow-2xs">
           Select your pickup and drop-off points, choose the right truck, and find the most affordable fare in seconds — <strong class="text-red-500 font-bold tracking-wider">NO HIDDEN COSTS</strong>.
         </p>
       </div>
@@ -160,25 +160,45 @@
 
             <!-- Pickup Location -->
             <div>
-              <label for="pickupLocation" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
-                Pickup Location <span class="text-red-500">*</span>
-              </label>
-              <select
-                id="pickupLocation"
-                formControlName="pickupLocationId"
-                class="w-full rounded-xl border bg-white py-2.5 px-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition"
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="pickupLocation" class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                  Pickup Location <span class="text-red-500">*</span>
+                </label>
+                <span class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 border border-emerald-200">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Origin
+                </span>
+              </div>
+              <div
+                class="relative flex items-center rounded-xl border bg-white shadow-2xs hover:border-slate-400 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-100 transition-all"
                 [ngClass]="tripForm.get('pickupLocationId')?.invalid && tripForm.get('pickupLocationId')?.touched ? 'border-rose-400 bg-rose-50/20 ring-1 ring-rose-200' : 'border-slate-300'"
               >
-                <option [ngValue]="null" disabled>Select Pickup Location...</option>
-                @for (loc of availableLocations; track loc.id) {
-                  <option
-                    [value]="loc.id"
-                    [disabled]="isLocationDisabled(loc.id, 'pickup')"
-                  >
-                    {{ loc.name }}{{ isLocationDisabled(loc.id, 'pickup') ? ' (Selected in Drop-off)' : '' }}
-                  </option>
-                }
-              </select>
+                <div class="pl-3.5 pr-1 pointer-events-none text-emerald-600 flex items-center">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <circle cx="12" cy="11" r="3" stroke-width="2" />
+                  </svg>
+                </div>
+                <select
+                  id="pickupLocation"
+                  formControlName="pickupLocationId"
+                  class="w-full appearance-none bg-transparent py-2.5 pl-2 pr-9 text-sm font-medium text-slate-800 outline-none cursor-pointer"
+                >
+                  <option [ngValue]="null" disabled>Select Pickup Location...</option>
+                  @for (loc of availableLocations; track loc.id) {
+                    <option
+                      [value]="loc.id"
+                      [disabled]="isLocationDisabled(loc.id, 'pickup')"
+                    >
+                      {{ loc.name }}{{ isLocationDisabled(loc.id, 'pickup') ? ' (Selected in Drop-off)' : '' }}
+                    </option>
+                  }
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
               @if (tripForm.get('pickupLocationId')?.invalid && tripForm.get('pickupLocationId')?.touched) {
                 <p class="mt-1 text-[11px] text-rose-600 font-semibold">• Please select a pickup location.</p>
               }
@@ -190,7 +210,12 @@
                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
                   Drop-off Locations (1–3 Ordered Stops) <span class="text-red-500">*</span>
                 </label>
-                <span class="text-xs text-slate-400">Drag to reorder</span>
+                <span class="text-[11px] font-medium text-slate-500 flex items-center gap-1.5 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/60">
+                  <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M7 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 2zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 14zm6-12a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 2zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 14z" />
+                  </svg>
+                  <span>Drag rows to reorder</span>
+                </span>
               </div>
 
               <!-- CDK Drop List -->
@@ -202,24 +227,29 @@
                 @for (control of dropOffControls; track $index; let i = $index) {
                   <div
                     cdkDrag
-                    class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-2xs hover:border-slate-300 transition group cursor-move"
+                    class="relative flex items-center bg-white rounded-xl border shadow-2xs hover:border-slate-400 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-100 transition-all group overflow-hidden"
+                    [ngClass]="control.invalid && control.touched ? 'border-rose-400 bg-rose-50/20 ring-1 ring-rose-200' : 'border-slate-300'"
                   >
                     <!-- Drag Handle Icon -->
-                    <div class="text-slate-400 group-hover:text-slate-600 px-1 select-none text-base">
-                      ⋮⋮
+                    <div
+                      class="pl-3 pr-1 text-slate-400 group-hover:text-slate-600 transition flex items-center shrink-0 cursor-grab active:cursor-grabbing select-none"
+                      title="Drag to reorder stop"
+                    >
+                      <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M7 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 2zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 14zm6-12a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 2zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 14z" />
+                      </svg>
                     </div>
 
                     <!-- Drop badge number -->
-                    <div class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center shrink-0">
+                    <div class="w-5 h-5 rounded-full bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center shrink-0 border border-slate-200">
                       {{ i + 1 }}
                     </div>
 
                     <!-- Dropdown for Location -->
-                    <div class="flex-1">
+                    <div class="relative flex-1">
                       <select
                         [formControl]="control"
-                        class="w-full rounded-lg border bg-white py-1.5 px-2.5 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none"
-                        [ngClass]="control.invalid && control.touched ? 'border-rose-400 bg-rose-50/20 ring-1 ring-rose-200' : 'border-slate-300'"
+                        class="w-full appearance-none bg-transparent py-2.5 pl-2.5 pr-8 text-sm font-medium text-slate-800 outline-none cursor-pointer"
                       >
                         <option [ngValue]="null" disabled>Select Drop-off {{ i + 1 }}...</option>
                         @for (loc of availableLocations; track loc.id) {
@@ -231,20 +261,27 @@
                           </option>
                         }
                       </select>
+                      <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-slate-400">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
                     </div>
 
                     <!-- Delete button (if > 1 drop) -->
                     @if (dropOffControls.length > 1) {
-                      <button
-                        type="button"
-                        (click)="removeDropOff(i)"
-                        class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition"
-                        title="Remove stop"
-                      >
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
+                      <div class="pr-2 pl-1 border-l border-slate-100 flex items-center">
+                        <button
+                          type="button"
+                          (click)="removeDropOff(i)"
+                          class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer"
+                          title="Remove stop"
+                        >
+                          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
                     }
                   </div>
                 }
@@ -382,7 +419,7 @@
                   min="1"
                   max="5"
                   formControlName="truckCount"
-                  class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none"
+                  class="w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm font-medium text-slate-800 shadow-2xs hover:border-slate-400 focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition"
                 />
                 <p class="mt-1 text-[11px] text-slate-500">
                   Total Capacity: <strong class="text-slate-800">{{ totalTruckCapacity }} tonnes</strong>
@@ -401,7 +438,7 @@
                   min="0.1"
                   placeholder="e.g. 5.0"
                   formControlName="cargoWeightTonnes"
-                  class="w-full rounded-xl border py-2.5 px-3 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none"
+                  class="w-full rounded-xl border bg-white py-2.5 px-3 text-sm font-medium text-slate-800 shadow-2xs hover:border-slate-400 focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition"
                   [ngClass]="tripForm.get('cargoWeightTonnes')?.invalid && tripForm.get('cargoWeightTonnes')?.touched ? 'border-rose-400 bg-rose-50/20 ring-1 ring-rose-200' : 'border-slate-300'"
                 />
                 @if (tripForm.get('cargoWeightTonnes')?.errors?.['required'] && tripForm.get('cargoWeightTonnes')?.touched) {
@@ -509,13 +546,14 @@
     }
 
     <!-- Success State: Detailed Quote Breakdown Card (Full Width) -->
-    @if (quoteService.state().status === 'success' && quoteService.state().estimate; as quote) {
+    @if (quoteService.state().status === 'success' && !quoteDismissed() && quoteService.state().estimate; as quote) {
       <section
-        class="bg-white rounded-2xl border shadow-md p-6 sm:p-8 space-y-6 transition-all"
+        id="quoteResultSection"
+        class="bg-white rounded-2xl border shadow-md p-6 sm:p-8 space-y-6 transition-all scroll-mt-24"
         [ngClass]="{'border-red-300 ring-2 ring-red-50': !inputsModifiedSinceQuote(), 'opacity-60 border-slate-200': inputsModifiedSinceQuote()}"
       >
         <!-- Estimate Top Bar -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-3">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between border-b border-slate-100 pb-4 gap-3">
           <div>
             <div class="flex items-center space-x-2">
               <span class="text-[11px] font-bold tracking-wider uppercase text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
@@ -526,15 +564,29 @@
             <h3 class="text-xl font-black text-slate-900 mt-1">Trip Fare Breakdown</h3>
           </div>
 
-          <div class="flex items-center space-x-4 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200/80">
-            <div>
-              <span class="text-[11px] text-slate-400 uppercase tracking-wider block">Total Distance</span>
-              <span class="text-lg font-bold text-slate-800">{{ quote.distanceKm }} km</span>
+          <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-4 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200/80">
+              <div>
+                <span class="text-[11px] text-slate-400 uppercase tracking-wider block">Total Distance</span>
+                <span class="text-lg font-bold text-slate-800">{{ quote.distanceKm }} km</span>
+              </div>
+              <div class="border-l border-slate-200 pl-4">
+                <span class="text-[11px] text-slate-400 uppercase tracking-wider block">Trucks</span>
+                <span class="text-lg font-bold text-slate-800">{{ quote.truckCount }} × {{ quote.calculatedForTrip.truckCategoryId | titlecase }}</span>
+              </div>
             </div>
-            <div class="border-l border-slate-200 pl-4">
-              <span class="text-[11px] text-slate-400 uppercase tracking-wider block">Trucks</span>
-              <span class="text-lg font-bold text-slate-800">{{ quote.truckCount }} × {{ quote.calculatedForTrip.truckCategoryId | titlecase }}</span>
-            </div>
+
+            <!-- Close / Dismiss Button -->
+            <button
+              type="button"
+              (click)="dismissQuote()"
+              class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+              title="Close quote breakdown"
+            >
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </div>
 
